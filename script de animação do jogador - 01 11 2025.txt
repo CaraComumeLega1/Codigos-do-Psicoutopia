@@ -1,0 +1,174 @@
+extends Node2D
+
+#Variaveis de partes do corpo
+var braco = "frente"
+onready var torax_inclinacao = false
+onready var cabeca = $n_torax/n_cabeca
+onready var torax = $n_torax
+onready var t_braco = $n_braco_tras
+onready var f_braco = $n_torax/n_braco_frente
+onready var t_perna = $n_perna_tras
+onready var f_perna = $n_torax/n_braco_frente
+
+#variaveis de partes do corpo com objetos
+onready var braco_armado = $n_braco_armado
+onready var pistola_1 = $n_braco_armado/n_gladiador_1
+onready var pistola_2 = $n_braco_armado/n_gladiador_2
+onready var revolver = $n_braco_armado/n_revolver
+onready var sub_merda = $n_braco_armado/n_sub_metralha
+
+onready var malvada = $n_braco_armado/n_malvada
+onready var lanca_chamas = $n_braco_armado/n_lanca_chamas
+
+onready var ladrao = $n_braco_armado/n_fuzil_tipo_1
+onready var catarinense = $n_braco_armado/n_fuzil_tipo_2
+onready var olheiro = $n_braco_armado/n_fuzil_tipo_3
+
+onready var demoman = $n_braco_armado/n_lanca_granadas
+
+onready var molotov = $n_braco_armado/n_molotov
+onready var granada = $n_braco_armado/n_granada
+
+
+onready var j_bolinha = $n_spin_dash
+var corpo_visivel = true
+
+func _process(_delta):
+	girar_cabeca()
+	virar_personagem()
+	animacao_de_combate()
+	inclinar_torax()
+	spin_dash_bola()
+	segurando_alguma_coisa()
+
+func girar_cabeca():
+	#CÓDIGO PARA VIRAR A CABEÇA
+	if variavel_global.c_angulo == 1:
+		cabeca.rotation_degrees = -35
+	elif variavel_global.c_angulo == -1:
+		cabeca.rotation_degrees = 35
+	else:
+		cabeca.rotation_degrees = 0
+
+func virar_personagem():
+	#código para virar personagem
+	if variavel_global.j_direcao == 1:
+		self.scale.x = 1
+	elif variavel_global.j_direcao == -1:
+		self.scale.x = -1
+		
+func animacao_de_combate():
+	if variavel_global.socando and not variavel_global.soco_anterior:
+			# Alterna o braço quando o botão é pressionado
+		if braco == "tras":
+			braco = "frente"
+		else:
+			braco = "tras"
+	
+	#CÓDIGO PARA FAZER O PERSONAGEM SOCAR
+	if not variavel_global.armado == true:
+		if variavel_global.socando:
+			torax_inclinacao = true
+			if braco == "tras":
+				t_braco.rotation_degrees = -100
+				f_braco.rotation_degrees = 0
+			else:
+				f_braco.rotation_degrees = -100
+				t_braco.rotation_degrees = 0
+		else:
+			# Resetar os dois braços quando não está socando
+			torax_inclinacao = false
+			t_braco.rotation_degrees = 0
+			f_braco.rotation_degrees = 0
+		
+func inclinar_torax():
+	#Código para girar o tórax
+	if torax_inclinacao == true:
+		if variavel_global.socando:
+			torax.rotation_degrees = 27
+	else:
+		torax.rotation_degrees = 0
+
+func spin_dash_bola():
+	j_bolinha.visible = variavel_global.forma_de_bola
+	torax.visible = corpo_visivel
+	cabeca.visible = corpo_visivel
+	t_braco.visible = corpo_visivel
+	f_braco.visible = corpo_visivel
+	t_perna.visible = corpo_visivel
+	f_perna.visible = corpo_visivel
+	braco_armado.visible = corpo_visivel
+	
+	if variavel_global.spin_dash or variavel_global.carregando_spindash:
+		variavel_global.forma_de_bola = true
+		corpo_visivel = false
+	else:
+		variavel_global.forma_de_bola = false
+		corpo_visivel = true
+		
+	if variavel_global.saltitando == true:
+		variavel_global.forma_de_bola = false
+		corpo_visivel = true
+		
+func segurando_alguma_coisa():
+	variavel_global.direcao_tiro = braco_armado.rotation_degrees
+	#parte do script para fazer a animação da arma
+	if variavel_global.armado == true and variavel_global.c_angulo == 1:
+		braco_armado.rotation_degrees = -35
+	elif variavel_global.armado == true and variavel_global.c_angulo == -1:
+		braco_armado.rotation_degrees = 35
+	else:
+		braco_armado.rotation_degrees = 0
+		
+	if variavel_global.lote_selecionado > 0 or variavel_global.spin_dash or variavel_global.carregando_spindash:
+		t_braco.visible = false
+		f_braco.visible = false
+	else:
+		t_braco.visible = true
+		f_braco.visible = true
+		
+		
+	if variavel_global.curto_calibre == true:
+		if variavel_global.lote_selecionado == 1:
+			pistola_1.visible = variavel_global.pistola_tipo == 1
+			pistola_2.visible = variavel_global.pistola_tipo == 2
+			revolver.visible = variavel_global.pistola_tipo == 3
+			sub_merda.visible = variavel_global.pistola_tipo == 4
+		else:
+			pistola_1.visible = false
+			pistola_2.visible = false
+			revolver.visible = false
+			sub_merda.visible = false
+				
+	if variavel_global.escopeta == true:
+		if variavel_global.lote_selecionado == 2:
+			malvada.visible = variavel_global.escopeta_tipo == 1
+			lanca_chamas.visible = variavel_global.escopeta_tipo == 2
+		else:
+			malvada.visible = false
+			lanca_chamas.visible = false
+			
+			
+	if variavel_global.fuzil == true:
+		if variavel_global.lote_selecionado == 3:
+			ladrao.visible = variavel_global.fuzil_tipo == 1
+			catarinense.visible = variavel_global.fuzil_tipo == 2
+			olheiro.visible = variavel_global.fuzil_tipo == 3
+		else:
+			ladrao.visible = false
+			catarinense.visible = false
+			olheiro.visible = false
+			
+	if variavel_global.armas_especiais == true:
+		if variavel_global.lote_selecionado == 4:
+			demoman.visible = variavel_global.especial_tipo == 1
+		else:
+			demoman.visible = false
+		
+	if variavel_global.granada_itens == true:
+		if variavel_global.lote_selecionado == 5:
+			molotov.visible = variavel_global.granada_tipo == 1
+			granada.visible = variavel_global.granada_tipo == 2
+		else:
+			molotov.visible = false
+			granada.visible = false
